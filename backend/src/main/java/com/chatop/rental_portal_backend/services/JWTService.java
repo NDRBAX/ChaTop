@@ -13,25 +13,34 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JWTService {
-    // Générer le token
-    private JwtEncoder jwtEncoder;
+    private final JwtEncoder jwtEncoder;
 
     public JWTService(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
     }
 
     public String generateToken(Authentication authentication) {
+        // Calcule la date d'expiration du token en ajoutant 1 heure à l'instant actuel
         Instant now = Instant.now();
+        Instant expiration = now.plus(1, ChronoUnit.HOURS);
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("self") // nom arbitraire pour l'émetteur du token
-                .issuedAt(now) // moment d'émission
-                .expiresAt(now.plus(1, ChronoUnit.DAYS)) // moment d'expiration 1 jour
-                .subject(authentication.getName()) // nom d'utilisateur associé
+                // Définit le sujet du JWT, souvent l'identifiant unique de l'utilisateur
+                .subject(authentication.getName())
+                // Ajoute une revendication pour indiquer la date d'émission du token
+                .issuedAt(now)
+                // Ajoute une revendication pour indiquer la date d'expiration du token
+                .expiresAt(expiration)
+                // Construit l'objet JwtClaimsSet qui contient les informations du JWT
                 .build();
 
-        JwtEncoderParameters jwtEncoderParameters = JwtEncoderParameters
-                .from(JwsHeader.with(MacAlgorithm.HS256).build(), claims);
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256)
+                .type("JWT")
+                .build();
 
-        return this.jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
+        JwtEncoderParameters jwtEncoderParameters = JwtEncoderParameters.from(header,
+                claims);
+
+        return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
     }
 }
