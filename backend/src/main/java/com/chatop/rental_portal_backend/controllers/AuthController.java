@@ -4,23 +4,22 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.chatop.rental_portal_backend.services.JWTService;
-import com.chatop.rental_portal_backend.services.AuthService;
-
-import jakarta.validation.Valid;
-
-import org.springframework.web.bind.annotation.GetMapping;
 
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.UserLoginDTO;
 import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
+import com.chatop.rental_portal_backend.services.AuthService;
+import com.chatop.rental_portal_backend.services.JWTService;
+
+import jakarta.validation.Valid;
 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
     public final JWTService jwtService;
     private final AuthService authService;
@@ -30,7 +29,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
         try {
             String token = authService.loginUser(userLoginDTO);
@@ -43,7 +42,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/auth/register")
+    @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
         try {
             // Enregistrement de l'utilisateur
@@ -57,7 +56,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/auth/me")
+    @GetMapping("/me")
     public ResponseEntity<AuthenticatedUserDTO> getAuthenticatedUser() {
         try {
             AuthenticatedUserDTO authenticatedUserDTO = authService.getAuthenticatedUser();
