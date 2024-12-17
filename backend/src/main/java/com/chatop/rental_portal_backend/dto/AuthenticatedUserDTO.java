@@ -13,6 +13,6 @@ public class AuthenticatedUserDTO {
     private Integer id;
     private String name;
     private String email;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private Timestamp created_at;
+    private Timestamp updated_at;
 }

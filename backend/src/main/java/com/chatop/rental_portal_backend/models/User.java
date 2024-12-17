@@ -12,7 +12,6 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
 import lombok.Data;
 
 @Data
@@ -34,19 +33,19 @@ public class User {
     @NotBlank
     private String password;
 
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private Timestamp created_at;
+    private Timestamp updated_at;
 
     @PrePersist
     protected void onCreate() {
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        this.createdAt = now;
-        this.updatedAt = now;
+        this.created_at = now;
+        this.updated_at = now;
     }
 
     // Met à jour la date de modification
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = new Timestamp(System.currentTimeMillis());
+        this.updated_at = new Timestamp(System.currentTimeMillis());
     }
 }
