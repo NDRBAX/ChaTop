@@ -4,21 +4,18 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
-// import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.UserLoginDTO;
 import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
 import com.chatop.rental_portal_backend.mappers.AuthenticatedUserMapper;
-
 import com.chatop.rental_portal_backend.mappers.RegisterUserMapper;
-
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.UserRepository;
 
@@ -34,6 +31,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     private final RegisterUserMapper registerUserMapper;
     private final AuthenticatedUserMapper authenticatedUserMapper;
@@ -43,12 +41,14 @@ public class AuthService {
             JWTService jwtService,
             RegisterUserMapper registerUserMapper,
             AuthenticationManager authenticationManager,
-            AuthenticatedUserMapper authenticatedUserMapper) {
+            AuthenticatedUserMapper authenticatedUserMapper,
+            BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.registerUserMapper = registerUserMapper;
         this.authenticationManager = authenticationManager;
         this.authenticatedUserMapper = authenticatedUserMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -67,6 +67,7 @@ public class AuthService {
 
         // Convertir le DTO en User
         User user = registerUserMapper.userRegisterDTOToUser(userRegisterDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Enregistrer l'utilisateur dans la base de données
         userRepository.save(user);
