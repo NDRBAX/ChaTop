@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.UserLoginDTO;
 import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
+import com.chatop.rental_portal_backend.exceptions.InvalidCredentialsException;
+import com.chatop.rental_portal_backend.exceptions.UserAlreadyExistsException;
+import com.chatop.rental_portal_backend.exceptions.UserNotAuthenticatedException;
 import com.chatop.rental_portal_backend.mappers.AuthenticatedUserMapper;
 import com.chatop.rental_portal_backend.mappers.RegisterUserMapper;
 import com.chatop.rental_portal_backend.models.User;
@@ -50,7 +53,7 @@ public class AuthService {
     public String registerUser(UserRegisterDTO userRegisterDTO) {
         if (userRepository.findByEmail(userRegisterDTO.getEmail()).isPresent()) {
             logger.error("### REGISTER USER ### Email {} is already in use", userRegisterDTO.getEmail());
-            throw new IllegalArgumentException("");
+            throw new UserAlreadyExistsException("");
         }
 
         User user = registerUserMapper.userRegisterDTOToUser(userRegisterDTO);
@@ -63,7 +66,7 @@ public class AuthService {
                 .map(this::generateToken)
                 .orElseThrow(() -> {
                     logger.error("### REGISTER USER ### Invalid credentials for email {}", user.getEmail());
-                    throw new RuntimeException("Invalid credentials for email " + user.getEmail());
+                    throw new InvalidCredentialsException("Invalid credentials for email " + user.getEmail());
                 });
     }
 
@@ -72,16 +75,16 @@ public class AuthService {
                 .map(this::generateToken)
                 .orElseThrow(() -> {
                     logger.error("### LOGIN USER ### Invalid credentials for email {}", userLoginDTO.getEmail());
-                    throw new IllegalArgumentException("Invalid credentials for email " + userLoginDTO.getEmail());
+                    throw new InvalidCredentialsException("Invalid credentials for email " + userLoginDTO.getEmail());
                 });
     }
 
-    public AuthenticatedUserDTO getAuthenticatedUser() {
+    public AuthenticatedUserDTO getAuthenticatedUser() throws UserNotAuthenticatedException {
         return getAuthenticatedUserFromContext()
                 .map(authenticatedUserMapper::userToAuthenticatedUserDTO)
                 .orElseThrow(() -> {
                     logger.error("### GET AUTHENTICATED USER ### User not authenticated");
-                    throw new IllegalArgumentException("");
+                    throw new UserNotAuthenticatedException("");
                 });
 
     }
