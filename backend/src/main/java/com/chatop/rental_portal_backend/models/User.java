@@ -43,7 +43,6 @@ public class User {
         this.updated_at = now;
     }
 
-    // Met à jour la date de modification
     @PreUpdate
     protected void onUpdate() {
         this.updated_at = new Timestamp(System.currentTimeMillis());
