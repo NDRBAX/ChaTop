@@ -1,6 +1,7 @@
 package com.chatop.rental_portal_backend.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
@@ -10,6 +11,8 @@ import com.chatop.rental_portal_backend.models.User;
 public interface RegisterUserMapper {
     RegisterUserMapper INSTANCE = Mappers.getMapper(RegisterUserMapper.class);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created_at", ignore = true)
+    @Mapping(target = "updated_at", ignore = true)
     User userRegisterDTOToUser(UserRegisterDTO userRegisterDTO);
-
 }
