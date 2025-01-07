@@ -2,9 +2,10 @@ package com.chatop.rental_portal_backend.controllers;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,56 +16,41 @@ import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.UserLoginDTO;
 import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
 import com.chatop.rental_portal_backend.services.AuthService;
-import com.chatop.rental_portal_backend.services.JWTService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("/api/auth")
 public class AuthController {
-    public final JWTService jwtService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthService authService;
 
-    public AuthController(JWTService jwtService, AuthService authService) {
-        this.jwtService = jwtService;
+    public AuthController(AuthService authService) {
         this.authService = authService;
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
-        try {
-            String token = authService.loginUser(userLoginDTO);
-
-            Map<String, String> response = Map.of("token", token);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            // Sinon -> erreur 401
-            return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
-        }
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
-        try {
-            // Enregistrement de l'utilisateur
-            String token = authService.registerUser(userRegisterDTO);
+        String token = authService.registerUser(userRegisterDTO);
+        Map<String, String> response = Map.of("token", token);
+        logger.info(">>> USER REGISTERED WITH EMAIL >>> {} <<<", userRegisterDTO.getEmail());
+        return ResponseEntity.ok(response);
+    }
 
-            // Répondre avec un token JWT
-            Map<String, String> response = Map.of("token", token);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(Map.of());
-        }
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
+        String token = authService.loginUser(userLoginDTO);
+        Map<String, String> response = Map.of("token", token);
+        logger.info(">>> USER LOGGED IN WITH EMAIL >>> {} <<<", userLoginDTO.getEmail());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
     public ResponseEntity<AuthenticatedUserDTO> getAuthenticatedUser() {
-        try {
-            AuthenticatedUserDTO authenticatedUserDTO = authService.getAuthenticatedUser();
-            return new ResponseEntity<>(authenticatedUserDTO, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        }
+        AuthenticatedUserDTO authenticatedUserDTO = authService.getAuthenticatedUser();
+        logger.info(">>> GETTING AUTHENTICATED USER WITH EMAIL >>> {} <<<",
+                authenticatedUserDTO.getEmail());
+        return new ResponseEntity<>(authenticatedUserDTO, HttpStatus.OK);
     }
 }
