@@ -3,8 +3,6 @@ package com.chatop.rental_portal_backend.services;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -17,10 +15,13 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.stereotype.Service;
 
-@Service
-public class JwtService {
+import com.chatop.rental_portal_backend.exceptions.InvalidTokenException;
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class JwtService implements IJwtService {
 
     private final JwtDecoder jwtDecoder;
     private final JwtEncoder jwtEncoder;
@@ -30,8 +31,9 @@ public class JwtService {
         this.jwtEncoder = jwtEncoder;
     }
 
+    @Override
     public String generateToken(Authentication authentication) {
-        logger.info("### Generating JWT token for user: {} ###", authentication.getName());
+        log.info("### Generating JWT token for user: {} ###", authentication.getName());
 
         Instant now = Instant.now();
         Instant expiration = now.plus(1, ChronoUnit.HOURS);
@@ -52,26 +54,28 @@ public class JwtService {
         return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
     }
 
+    @Override
     public boolean validateToken(String token) {
         try {
             jwtDecoder.decode(token);
             return true;
         } catch (JwtValidationException e) {
-            logger.error("### Invalid JWT token: {} ###", token);
+            log.error("### Invalid JWT token: {} ###", e.getMessage());
             return false;
         } catch (JwtException e) {
-            logger.error("### Error during token validation: {} ###", e.getMessage());
-            throw new RuntimeException("Unexpected error during token validation", e);
+            log.error("### Error during token validation: {} ###", e.getMessage());
+            throw new InvalidTokenException("Unexpected error during token validation");
         }
     }
 
+    @Override
     public Jwt decodeToken(String token) {
         try {
-            logger.info("### Decoding JWT token: {} ###", token);
+            log.info("### Decoding JWT token: {} ###", token);
             return jwtDecoder.decode(token);
         } catch (JwtException e) {
-            logger.error("### Invalid JWT token: {} ###", token);
-            throw new RuntimeException("Invalid token: " + e.getMessage(), e);
+            log.error("### Invalid JWT token: {} ###", e.getMessage());
+            throw new InvalidTokenException("Invalid token");
         }
     }
 

@@ -2,10 +2,7 @@ package com.chatop.rental_portal_backend.controllers;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,54 +14,58 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chatop.rental_portal_backend.dto.CreateRentalDTO;
 import com.chatop.rental_portal_backend.dto.RentalResponseDTO;
+import com.chatop.rental_portal_backend.dto.RentalsResponseDTO;
+import com.chatop.rental_portal_backend.dto.ResponseMessageDTO;
 import com.chatop.rental_portal_backend.dto.UpdateRentalDTO;
-import com.chatop.rental_portal_backend.services.RentalService;
+import com.chatop.rental_portal_backend.services.IRentalService;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/rentals")
 public class RentalController {
-    private static final Logger logger = LoggerFactory.getLogger(RentalController.class);
 
-    private final RentalService rentalService;
+    private final IRentalService rentalService;
 
-    public RentalController(RentalService rentalService) {
+    public RentalController(IRentalService rentalService) {
         this.rentalService = rentalService;
     }
 
     // Get all rentals -> 200 / 401
     @GetMapping
-    public ResponseEntity<Map<String, List<RentalResponseDTO>>> getRentals() {
-        logger.info(">>> GETTING ALL RENTALS <<<");
+    public ResponseEntity<RentalsResponseDTO> getRentals() {
+        log.info(">>> GETTING ALL RENTALS <<<");
         List<RentalResponseDTO> rentals = rentalService.getRentals();
-        return ResponseEntity.ok(Map.of("rentals", rentals));
+        RentalsResponseDTO response = new RentalsResponseDTO(rentals);
+        return ResponseEntity.ok(response);
     }
 
     // Get a rental by id -> 200 / 401
     @GetMapping("/{id}")
     public ResponseEntity<RentalResponseDTO> getRentalById(@Valid @PathVariable int id) {
-        logger.info(">>> GETTING RENTAL BY ID >>> {} <<<", id);
+        log.info(">>> GETTING RENTAL BY ID >>> {} <<<", id);
         RentalResponseDTO rental = rentalService.getRentalById(id);
         return ResponseEntity.ok(rental);
     }
 
     // Create a rental -> 200 / 401
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Map<String, String>> createRental(
+    public ResponseEntity<ResponseMessageDTO> createRental(
             @Valid @ModelAttribute CreateRentalDTO createRentalDTO) throws IOException {
-        logger.info(">>> CREATING A RENTAL >>> {} <<<", createRentalDTO);
+        log.info(">>> CREATING A RENTAL >>> {} <<<", createRentalDTO);
         rentalService.createRental(createRentalDTO);
-        return ResponseEntity.ok(Map.of("message", "Rental created !"));
+        return ResponseEntity.ok(new ResponseMessageDTO("Rental created !"));
     }
 
     // Update a rental -> 200 / 401
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateRental(@Valid @PathVariable int id,
+    public ResponseEntity<ResponseMessageDTO> updateRental(@Valid @PathVariable int id,
             @Valid @ModelAttribute UpdateRentalDTO udateRentalDTO) {
-        logger.info(">>> UPDATING A RENTAL BY ID >>> {} <<<", id);
+        log.info(">>> UPDATING A RENTAL BY ID >>> {} <<<", id);
         rentalService.updateRental(id, udateRentalDTO);
-        return ResponseEntity.ok(Map.of("message", "Rental updated !"));
+        return ResponseEntity.ok(new ResponseMessageDTO("Rental updated !"));
     }
 
 }

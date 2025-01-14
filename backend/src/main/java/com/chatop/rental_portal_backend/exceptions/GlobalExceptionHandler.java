@@ -1,8 +1,5 @@
 package com.chatop.rental_portal_backend.exceptions;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,8 +8,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.chatop.rental_portal_backend.dto.EmptyResponseDTO;
+import com.chatop.rental_portal_backend.dto.ResponseMessageDTO;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -20,32 +22,32 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     @ExceptionHandler({ UserAlreadyExistsException.class, InvalidRequestException.class })
-    public Map<String, String> handleUserAlreadyExistsException() {
-        return Collections.emptyMap();
+    public EmptyResponseDTO handleUserAlreadyExistsException() {
+        return new EmptyResponseDTO();
     }
 
     // LOGIN
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED) // 401
     @ExceptionHandler(InvalidCredentialsException.class)
-    public Map<String, String> handleInvalidCredentialsException(
+    public ResponseMessageDTO handleInvalidCredentialsException(
             InvalidCredentialsException invalidCredentialsException) {
-        return Map.of("message",
-                invalidCredentialsException.getMessage());
+        return new ResponseMessageDTO(invalidCredentialsException.getMessage());
     }
 
     // GET AUTHENTICATED USER
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED) // 401
-    @ExceptionHandler(UserNotAuthenticatedException.class)
-    public Map<String, String> handleBadCredentialsException() {
-        return Collections.emptyMap();
+    @ExceptionHandler({ UserNotAuthenticatedException.class, InvalidTokenException.class })
+    public EmptyResponseDTO handleBadCredentialsException(InvalidTokenException ex) {
+        log.error("Handling invalid token exception: {}", ex.getMessage());
+        return new EmptyResponseDTO();
     }
 
     // VALIDATION
     @ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex,
+    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex,
             HttpServletRequest request) {
         StringBuilder errorMessage = new StringBuilder();
 
@@ -58,13 +60,11 @@ public class GlobalExceptionHandler {
         });
 
         String requestURI = request.getRequestURI();
-
         if (requestURI.contains("/register") || requestURI.contains("/me")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyMap());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new EmptyResponseDTO());
         } else if (requestURI.contains("/login")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", errorMessage.toString()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseMessageDTO(errorMessage.toString()));
         }
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", errorMessage.toString()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessageDTO(errorMessage.toString()));
     }
 }

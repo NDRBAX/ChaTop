@@ -19,53 +19,54 @@ import com.chatop.rental_portal_backend.services.UserDetailsLoaderService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+        private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
-    private static final String[] PUBLIC_PATHS = {
-            "/api/auth/register",
-            "/api/auth/login",
-            "/swagger-ui/**",
-            "/api-docs/**"
-    };
+        private static final String[] PUBLIC_PATHS = {
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/swagger-ui/**",
+                        "/api-docs/**"
+        };
 
-    private final UserDetailsLoaderService userDetailsLoaderService;
-    private final JwtService jwtService;
+        private final UserDetailsLoaderService userDetailsLoaderService;
+        private final JwtService jwtService;
 
-    public SecurityConfig(UserDetailsLoaderService userDetailsLoaderService, JwtService jwtService) {
-        this.userDetailsLoaderService = userDetailsLoaderService;
-        this.jwtService = jwtService;
-    }
+        public SecurityConfig(UserDetailsLoaderService userDetailsLoaderService, JwtService jwtService) {
+                this.userDetailsLoaderService = userDetailsLoaderService;
+                this.jwtService = jwtService;
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        logger.info("### SECURITY FILTER CHAIN CONFIGURATION ###");
-        return http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/auth/register", "/api/auth/login"))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(PUBLIC_PATHS)
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtService::decodeToken)))
-                .build();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                logger.info("### SECURITY FILTER CHAIN CONFIGURATION ###");
+                return http
+                                .csrf(csrf -> csrf.ignoringRequestMatchers(PUBLIC_PATHS))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                                                .requestMatchers(PUBLIC_PATHS)
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .oauth2ResourceServer((oauth2) -> oauth2
+                                                .jwt(jwt -> jwt.decoder(jwtService::decodeToken)))
+                                .build();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        logger.info("### AUTHENTICATION MANAGER CONFIGURATION ###");
-        AuthenticationManagerBuilder authenticationManagerBuilder = http
-                .getSharedObject(AuthenticationManagerBuilder.class);
+        @Bean
+        public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+                logger.info("### AUTHENTICATION MANAGER CONFIGURATION ###");
+                AuthenticationManagerBuilder authenticationManagerBuilder = http
+                                .getSharedObject(AuthenticationManagerBuilder.class);
 
-        authenticationManagerBuilder.userDetailsService(userDetailsLoaderService)
-                .passwordEncoder(passwordEncoder());
+                authenticationManagerBuilder.userDetailsService(userDetailsLoaderService)
+                                .passwordEncoder(passwordEncoder());
 
-        return authenticationManagerBuilder.build();
-    }
+                return authenticationManagerBuilder.build();
+        }
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        logger.info("### BCRYPT PASSWORD ENCODER CONFIGURATION ###");
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public BCryptPasswordEncoder passwordEncoder() {
+                logger.info("### BCRYPT PASSWORD ENCODER CONFIGURATION ###");
+                return new BCryptPasswordEncoder();
+        }
 }

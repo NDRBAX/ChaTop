@@ -1,17 +1,17 @@
 package com.chatop.rental_portal_backend.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.chatop.rental_portal_backend.dto.SendMessageDTO;
+import com.chatop.rental_portal_backend.dto.MessageRequestDTO;
 import com.chatop.rental_portal_backend.mappers.SendMessageMapper;
 import com.chatop.rental_portal_backend.models.Message;
 import com.chatop.rental_portal_backend.repositories.MessageRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-public class MessageService {
-    private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
+public class MessageService implements IMessageService {
 
     private final MessageRepository messageRepository;
     private final SendMessageMapper sendMessageMapper;
@@ -21,11 +21,10 @@ public class MessageService {
         this.sendMessageMapper = sendMessageMapper;
     }
 
-    public void sendMessage(SendMessageDTO message) {
-
-        logger.info(">>> MESSAGE SENT");
-        Message newMessage = sendMessageMapper.sendMessageDTOToMessage(message);
-
+    @Override
+    public void sendMessage(MessageRequestDTO messageRequest) {
+        log.info(">>> MESSAGE SENT");
+        Message newMessage = sendMessageMapper.messageRequestDTOToMessage(messageRequest);
         messageRepository.save(newMessage);
     }
 }
