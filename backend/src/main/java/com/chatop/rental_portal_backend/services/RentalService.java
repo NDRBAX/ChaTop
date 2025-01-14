@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.chatop.rental_portal_backend.dto.CreateRentalDTO;
@@ -18,9 +16,11 @@ import com.chatop.rental_portal_backend.models.Rental;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.RentalRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-public class RentalService {
-    private static final Logger logger = LoggerFactory.getLogger(RentalService.class);
+public class RentalService implements IRentalService {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -42,8 +42,9 @@ public class RentalService {
     }
 
     // Get all rentals
+    @Override
     public List<RentalResponseDTO> getRentals() {
-        logger.info(">>> GETTING ALL RENTALS");
+        log.info(">>> GETTING ALL RENTALS");
         List<Rental> rentalsFromDb = rentalRepository.findAll();
 
         List<RentalResponseDTO> rentals = rentalsFromDb.stream()
@@ -63,8 +64,9 @@ public class RentalService {
     }
 
     // Get a rental by id
+    @Override
     public RentalResponseDTO getRentalById(int id) {
-        logger.info(">>> GETTING RENTAL BY ID");
+        log.info(">>> GETTING RENTAL BY ID");
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rental not found"));
 
@@ -81,11 +83,12 @@ public class RentalService {
     }
 
     // Create a rental
+    @Override
     public void createRental(CreateRentalDTO createRentalDTO) {
         Optional<String> imageUrl = cloudinaryService.uploadImage(createRentalDTO.getPicture());
 
         if (imageUrl.isEmpty()) {
-            logger.error("### CREATE RENTAL ### Error uploading image");
+            log.error("### CREATE RENTAL ### Error uploading image");
             throw new RuntimeException("Error uploading image");
         }
 
@@ -97,6 +100,7 @@ public class RentalService {
     }
 
     // Update a rental by id
+    @Override
     public void updateRental(int id, UpdateRentalDTO updateRentalDTO) {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rental not found"));
