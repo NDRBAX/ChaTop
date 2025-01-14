@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import com.chatop.rental_portal_backend.dto.UserRegisterDTO;
+import com.chatop.rental_portal_backend.dto.RegisterRequestDTO;
 import com.chatop.rental_portal_backend.models.User;
 
 @Mapper(componentModel = "spring")
@@ -14,5 +14,5 @@ public interface RegisterUserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created_at", ignore = true)
     @Mapping(target = "updated_at", ignore = true)
-    User userRegisterDTOToUser(UserRegisterDTO userRegisterDTO);
+    User registerRequestDTOToUser(RegisterRequestDTO registerRequestDTO);
 }
