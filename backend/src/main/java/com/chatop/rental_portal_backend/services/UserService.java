@@ -1,7 +1,5 @@
 package com.chatop.rental_portal_backend.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
@@ -9,11 +7,11 @@ import com.chatop.rental_portal_backend.mappers.AuthenticatedUserMapper;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-public class UserService {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-
+public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final AuthenticatedUserMapper authenticatedUserMapper;
 
@@ -22,14 +20,11 @@ public class UserService {
         this.authenticatedUserMapper = authenticatedUserMapper;
     }
 
-    // Get user by id
+    @Override
     public AuthenticatedUserDTO getUserById(int id) {
-        logger.info(">>> GETTING USER BY ID: " + id);
-
+        log.info(">>> GETTING USER BY ID: " + id);
         User user = userRepository.findById(id).orElse(null);
-        AuthenticatedUserDTO response = authenticatedUserMapper.userToAuthenticatedUserDTO(user);
-
-        return response;
+        return authenticatedUserMapper.userToAuthenticatedUserDTO(user);
 
     }
 }
