@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.chatop.rental_portal_backend.dto.SendMessageDTO;
+import com.chatop.rental_portal_backend.dto.MessageRequestDTO;
 import com.chatop.rental_portal_backend.models.Message;
 import com.chatop.rental_portal_backend.models.Rental;
 import com.chatop.rental_portal_backend.models.User;
@@ -22,7 +22,7 @@ public interface SendMessageMapper {
     @Mapping(target = "updated_at", ignore = true)
     @Mapping(target = "rental", source = "rental_id")
     @Mapping(target = "user", source = "user_id")
-    Message sendMessageDTOToMessage(SendMessageDTO sendMessageDTO);
+    Message messageRequestDTOToMessage(MessageRequestDTO messageRequest);
 
     @Component
     class Helper {
