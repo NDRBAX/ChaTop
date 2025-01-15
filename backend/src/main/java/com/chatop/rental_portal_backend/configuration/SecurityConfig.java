@@ -23,9 +23,11 @@ public class SecurityConfig {
         private static final String[] PUBLIC_PATHS = {
                         "/api/auth/register",
                         "/api/auth/login",
-                        "/api/auth/me",
+        };
+
+        private static final String[] SWAGGER_PATHS = {
                         "/swagger-ui/**",
-                        "/api-docs/**"
+                        "/api-docs/**",
         };
 
         private final UserDetailsLoaderService userDetailsLoaderService;
@@ -48,6 +50,7 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                                                 .requestMatchers(PUBLIC_PATHS).permitAll()
+                                                .requestMatchers(SWAGGER_PATHS).hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2ResourceServer(oauth2 -> oauth2
                                                 .jwt(jwt -> jwt.decoder(jwtService::decodeToken))
