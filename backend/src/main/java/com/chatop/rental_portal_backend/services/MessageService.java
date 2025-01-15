@@ -6,6 +6,7 @@ import com.chatop.rental_portal_backend.dto.MessageRequestDTO;
 import com.chatop.rental_portal_backend.mappers.SendMessageMapper;
 import com.chatop.rental_portal_backend.models.Message;
 import com.chatop.rental_portal_backend.repositories.MessageRepository;
+import com.chatop.rental_portal_backend.services.impl.IMessageService;
 
 import lombok.extern.slf4j.Slf4j;
 
