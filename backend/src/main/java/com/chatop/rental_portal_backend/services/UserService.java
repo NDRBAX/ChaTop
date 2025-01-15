@@ -6,6 +6,7 @@ import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.mappers.AuthenticatedUserMapper;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.UserRepository;
+import com.chatop.rental_portal_backend.services.impl.IUserService;
 
 import lombok.extern.slf4j.Slf4j;
 
