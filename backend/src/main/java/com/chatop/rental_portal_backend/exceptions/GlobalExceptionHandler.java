@@ -59,7 +59,10 @@ public class GlobalExceptionHandler {
         });
 
         String requestURI = request.getRequestURI();
-        if (requestURI.contains("/register") || requestURI.contains("/me")) {
+        if (requestURI.contains("/me")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON)
+                    .body("{}");
+        } else if (requestURI.contains("/register")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                     .body("{}");
         } else if (requestURI.contains("/login")) {
