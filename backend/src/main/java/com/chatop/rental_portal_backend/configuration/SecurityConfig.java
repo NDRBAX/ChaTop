@@ -1,7 +1,5 @@
 package com.chatop.rental_portal_backend.configuration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,49 +10,56 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.chatop.rental_portal_backend.services.JwtService;
+import com.chatop.rental_portal_backend.security.ChatopAuthenticationEntryPoint;
 import com.chatop.rental_portal_backend.services.UserDetailsLoaderService;
+import com.chatop.rental_portal_backend.services.impl.IJwtService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-        private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
         private static final String[] PUBLIC_PATHS = {
                         "/api/auth/register",
                         "/api/auth/login",
+                        "/api/auth/me",
                         "/swagger-ui/**",
                         "/api-docs/**"
         };
 
         private final UserDetailsLoaderService userDetailsLoaderService;
-        private final JwtService jwtService;
+        private final IJwtService jwtService;
+        private final ChatopAuthenticationEntryPoint chatopAuthenticationEntryPoint;
 
-        public SecurityConfig(UserDetailsLoaderService userDetailsLoaderService, JwtService jwtService) {
+        public SecurityConfig(UserDetailsLoaderService userDetailsLoaderService, IJwtService jwtService,
+                        ChatopAuthenticationEntryPoint chatopAuthenticationEntryPoint) {
                 this.userDetailsLoaderService = userDetailsLoaderService;
                 this.jwtService = jwtService;
+                this.chatopAuthenticationEntryPoint = chatopAuthenticationEntryPoint;
         }
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                logger.info("### SECURITY FILTER CHAIN CONFIGURATION ###");
+                log.info("### SECURITY FILTER CHAIN CONFIGURATION ###");
                 return http
                                 .csrf(csrf -> csrf.ignoringRequestMatchers(PUBLIC_PATHS))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                                                .requestMatchers(PUBLIC_PATHS)
-                                                .permitAll()
+                                                .requestMatchers(PUBLIC_PATHS).permitAll()
                                                 .anyRequest().authenticated())
-                                .oauth2ResourceServer((oauth2) -> oauth2
-                                                .jwt(jwt -> jwt.decoder(jwtService::decodeToken)))
+                                .oauth2ResourceServer(oauth2 -> oauth2
+                                                .jwt(jwt -> jwt.decoder(jwtService::decodeToken))
+                                                .authenticationEntryPoint(chatopAuthenticationEntryPoint)
+
+                                )
                                 .build();
         }
 
         @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-                logger.info("### AUTHENTICATION MANAGER CONFIGURATION ###");
+                log.info("### AUTHENTICATION MANAGER CONFIGURATION ###");
                 AuthenticationManagerBuilder authenticationManagerBuilder = http
                                 .getSharedObject(AuthenticationManagerBuilder.class);
 
@@ -66,7 +71,8 @@ public class SecurityConfig {
 
         @Bean
         public BCryptPasswordEncoder passwordEncoder() {
-                logger.info("### BCRYPT PASSWORD ENCODER CONFIGURATION ###");
+                log.info("### BCRYPT PASSWORD ENCODER CONFIGURATION ###");
                 return new BCryptPasswordEncoder();
         }
+
 }
