@@ -1,4 +1,4 @@
-package com.chatop.rental_portal_backend.services;
+package com.chatop.rental_portal_backend.services.impl;
 
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.LoginRequestDTO;
@@ -10,4 +10,5 @@ public interface IAuthService {
     String loginUser(LoginRequestDTO userLoginDTO);
 
     AuthenticatedUserDTO getAuthenticatedUser();
+
 }

@@ -1,4 +1,4 @@
-package com.chatop.rental_portal_backend.services;
+package com.chatop.rental_portal_backend.services.impl;
 
 import java.util.List;
 

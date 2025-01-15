@@ -11,11 +11,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.stereotype.Service;
 
-import com.chatop.rental_portal_backend.exceptions.InvalidTokenException;
+import com.chatop.rental_portal_backend.services.impl.IJwtService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,28 +53,8 @@ public class JwtService implements IJwtService {
     }
 
     @Override
-    public boolean validateToken(String token) {
-        try {
-            jwtDecoder.decode(token);
-            return true;
-        } catch (JwtValidationException e) {
-            log.error("### Invalid JWT token: {} ###", e.getMessage());
-            return false;
-        } catch (JwtException e) {
-            log.error("### Error during token validation: {} ###", e.getMessage());
-            throw new InvalidTokenException("Unexpected error during token validation");
-        }
-    }
-
-    @Override
     public Jwt decodeToken(String token) {
-        try {
-            log.info("### Decoding JWT token: {} ###", token);
-            return jwtDecoder.decode(token);
-        } catch (JwtException e) {
-            log.error("### Invalid JWT token: {} ###", e.getMessage());
-            throw new InvalidTokenException("Invalid token");
-        }
+        return jwtDecoder.decode(token);
     }
 
 }

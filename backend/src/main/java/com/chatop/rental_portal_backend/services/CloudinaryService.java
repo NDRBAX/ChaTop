@@ -7,11 +7,12 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.chatop.rental_portal_backend.services.impl.ICloudinaryService;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 @Service
-public class CloudinaryService {
+public class CloudinaryService implements ICloudinaryService {
 
     private final Cloudinary cloudinary;
 
@@ -20,6 +21,7 @@ public class CloudinaryService {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public Optional<String> uploadImage(MultipartFile file) {
         try {
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(

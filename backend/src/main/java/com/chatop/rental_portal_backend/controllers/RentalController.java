@@ -17,12 +17,15 @@ import com.chatop.rental_portal_backend.dto.RentalResponseDTO;
 import com.chatop.rental_portal_backend.dto.RentalsResponseDTO;
 import com.chatop.rental_portal_backend.dto.ResponseMessageDTO;
 import com.chatop.rental_portal_backend.dto.UpdateRentalDTO;
-import com.chatop.rental_portal_backend.services.IRentalService;
+import com.chatop.rental_portal_backend.services.impl.IRentalService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/api/rentals")
-@Tag(name = "Rentals", description = "Endpoints for rental management")
+@Tag(name = "Rentals", description = "Endpoints for rental management. There are endpoints for fetching all rentals, fetching a rental by ID, creating a rental, and updating a rental.")
 public class RentalController {
 
     private final IRentalService rentalService;
@@ -48,14 +51,20 @@ public class RentalController {
                 responseCode = "200",
                 description = "User details retrieved successfully", content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = RentalsResponseDTO.class))
+
             ),
             @ApiResponse(
                 responseCode = "401",
                 description = "Unauthorized",
-                content = @Content(mediaType = "application/json")
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Void.class),
+                examples = @ExampleObject(value = "",
+                summary = "Unauthorized")
+                )
             )
         }
     )
+    @SecurityRequirement(name = "bearer-key")
     @GetMapping
     public ResponseEntity<RentalsResponseDTO> getRentals() {
         log.info(">>> GETTING ALL RENTALS <<<");
@@ -77,10 +86,21 @@ public class RentalController {
             @ApiResponse(
                 responseCode = "401",
                 description = "Unauthorized",
-                content = @Content(mediaType = "application/json")
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Void.class),
+                examples = @ExampleObject(value = "",
+                summary = "Unauthorized")
+                )
             )
         }
     )
+    @Parameter(
+        name = "id",
+        description = "The rental ID",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = int.class))
+    )
+    @SecurityRequirement(name = "bearer-key")
     @GetMapping("/{id}")
     public ResponseEntity<RentalResponseDTO> getRentalById(@Valid @PathVariable int id) {
         log.info(">>> GETTING RENTAL BY ID >>> {} <<<", id);
@@ -88,7 +108,6 @@ public class RentalController {
         return ResponseEntity.ok(rental);
     }
 
-    // Create a rental -> 200 / 401
     @Operation(
         summary = "Create a rental",
         description = "Creates a rental in the database.",
@@ -97,15 +116,33 @@ public class RentalController {
                 responseCode = "200",
                 description = "Rental created successfully",
                 content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDTO.class))
+                schema = @Schema(implementation = ResponseMessageDTO.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "message": "Rental created !"
+                    }
+                    """,
+                    summary = "Rental created successfully")
+                )
             ),
             @ApiResponse(
                 responseCode = "401",
                 description = "Unauthorized",
-                content = @Content(mediaType = "application/json")
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Void.class),
+                examples = @ExampleObject(value = "",
+                summary = "Unauthorized"))
             )
         }
     )
+    @Parameter(
+        name = "createRentalDTO",
+        description = "The rental creation request",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = CreateRentalDTO.class))
+    )
+    @SecurityRequirement(name = "bearer-key")
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<ResponseMessageDTO> createRental(
             @Valid @ModelAttribute CreateRentalDTO createRentalDTO) throws IOException {
@@ -114,7 +151,6 @@ public class RentalController {
         return ResponseEntity.ok(new ResponseMessageDTO("Rental created !"));
     }
 
-    // Update a rental -> 200 / 401
     @Operation(
         summary = "Update a rental",
         description = "Updates a rental in the database.",
@@ -123,20 +159,44 @@ public class RentalController {
                 responseCode = "200",
                 description = "Rental updated successfully",
                 content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDTO.class))
+                schema = @Schema(implementation = ResponseMessageDTO.class),
+                examples = @ExampleObject(
+                    value = """
+                    {
+                        "message": "Rental updated !"
+                    }
+                    """,
+                    summary = "Rental updated successfully")
+                )
             ),
             @ApiResponse(
                 responseCode = "401",
                 description = "Unauthorized",
-                content = @Content(mediaType = "application/json")
+                content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = Void.class),
+                examples = @ExampleObject(value = "",
+                summary = "Unauthorized"))
             )
         }
     )
+    @Parameter(
+        name = "id",
+        description = "The rental ID",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = int.class))
+    )
+    @Parameter(
+        name = "updateRentalDTO",
+        description = "The rental update request",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = UpdateRentalDTO.class))
+    )
+    @SecurityRequirement(name = "bearer-key")
     @PutMapping("/{id}")
     public ResponseEntity<ResponseMessageDTO> updateRental(@Valid @PathVariable int id,
-            @Valid @ModelAttribute UpdateRentalDTO udateRentalDTO) {
+            @Valid @ModelAttribute UpdateRentalDTO updateRentalDTO) {
         log.info(">>> UPDATING A RENTAL BY ID >>> {} <<<", id);
-        rentalService.updateRental(id, udateRentalDTO);
+        rentalService.updateRental(id, updateRentalDTO);
         return ResponseEntity.ok(new ResponseMessageDTO("Rental updated !"));
     }
 

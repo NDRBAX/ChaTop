@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service;
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
 import com.chatop.rental_portal_backend.dto.LoginRequestDTO;
 import com.chatop.rental_portal_backend.dto.RegisterRequestDTO;
-import com.chatop.rental_portal_backend.exceptions.InvalidCredentialsException;
-import com.chatop.rental_portal_backend.exceptions.InvalidRequestException;
+import com.chatop.rental_portal_backend.exceptions.InvalidLoginRequestException;
 import com.chatop.rental_portal_backend.exceptions.UserAlreadyExistsException;
 import com.chatop.rental_portal_backend.exceptions.UserNotAuthenticatedException;
 import com.chatop.rental_portal_backend.mappers.AuthenticatedUserMapper;
 import com.chatop.rental_portal_backend.mappers.RegisterUserMapper;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.UserRepository;
+import com.chatop.rental_portal_backend.services.impl.IAuthService;
+import com.chatop.rental_portal_backend.services.impl.IJwtService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,71 +56,57 @@ public class AuthService implements IAuthService {
     @Override
     public String registerUser(RegisterRequestDTO registerRequestDTO) {
         if (userRepository.findByEmail(registerRequestDTO.getEmail()).isPresent()) {
-            log.error("### REGISTER USER ### Email {} is already in use", registerRequestDTO.getEmail());
-            throw new UserAlreadyExistsException("");
+            throw new UserAlreadyExistsException();
         }
-
         User user = registerUserMapper.registerRequestDTOToUser(registerRequestDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
         log.info("### REGISTER USER ### User registered successfully with email {}", user.getEmail());
-
-        return authenticateUser(user.getEmail(), registerRequestDTO.getPassword())
-                .map(this::generateToken)
-                .orElseThrow(() -> {
-                    log.error("### REGISTER USER ### Invalid credentials for email {}", user.getEmail());
-                    throw new InvalidRequestException("Invalid credentials for email " + user.getEmail());
-                });
+        Authentication authentication = authenticateUser(user.getEmail(), registerRequestDTO.getPassword());
+        return generateToken(authentication);
     }
 
     @Override
     public String loginUser(LoginRequestDTO loginRequestDTO) {
-        return authenticateUser(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
-                .map(this::generateToken)
-                .orElseThrow(() -> {
-                    log.error("### LOGIN USER ### Invalid credentials for email {}", loginRequestDTO.getEmail());
-                    throw new InvalidCredentialsException(
-                            "Invalid credentials for email " + loginRequestDTO.getEmail());
-                });
+        Authentication authentication = authenticateUser(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
+        return generateToken(authentication);
     }
 
     @Override
-    public AuthenticatedUserDTO getAuthenticatedUser() throws UserNotAuthenticatedException {
+    public AuthenticatedUserDTO getAuthenticatedUser() {
         return getAuthenticatedUserFromContext()
                 .map(authenticatedUserMapper::userToAuthenticatedUserDTO)
                 .orElseThrow(() -> {
-                    log.error("### GET AUTHENTICATED USER ### User not authenticated");
-                    throw new UserNotAuthenticatedException("");
+                    throw new UserNotAuthenticatedException();
                 });
 
     }
 
     private Optional<User> getAuthenticatedUserFromContext() {
         try {
-            log.info("### GET AUTHENTICATED USER ### Getting authenticated user from context");
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
-                log.error("### GET AUTHENTICATED USER ### No authenticated user found in context");
-                return Optional.empty();
+                throw new UserNotAuthenticatedException();
             }
             return Optional.of(authentication)
                     .map(Authentication::getName)
                     .flatMap(userRepository::findByEmail);
         } catch (AuthenticationException | JwtException ex) {
-            log.error("Unable to get authenticated user. {}", ex.getMessage());
+            log.error("### GET AUTHENTICATED USER ### No authenticated user found in context");
             return Optional.empty();
         }
+
     }
 
-    private Optional<Authentication> authenticateUser(String email, String password) {
+    private Authentication authenticateUser(String email, String password) {
         try {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(email, password));
-            return Optional.of(authentication);
-        } catch (AuthenticationException ex) {
+            return authentication;
+        } catch (AuthenticationException | JwtException ex) {
             log.error("Unable to authenticate user. {}", ex.getMessage());
-            return Optional.empty();
+            throw new InvalidLoginRequestException("Invalid credentials for email " + email);
         }
     }
 
