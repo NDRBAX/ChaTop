@@ -15,6 +15,9 @@ import com.chatop.rental_portal_backend.mappers.CreateRentalMapper;
 import com.chatop.rental_portal_backend.models.Rental;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.RentalRepository;
+import com.chatop.rental_portal_backend.services.impl.IAuthService;
+import com.chatop.rental_portal_backend.services.impl.ICloudinaryService;
+import com.chatop.rental_portal_backend.services.impl.IRentalService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,13 +28,13 @@ public class RentalService implements IRentalService {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final RentalRepository rentalRepository;
-    private final CloudinaryService cloudinaryService;
-    private final AuthService authService;
+    private final ICloudinaryService cloudinaryService;
+    private final IAuthService authService;
     private final AuthenticatedUserMapper authenticatedUserMapper;
     private final CreateRentalMapper createRentalMapper;
 
-    public RentalService(RentalRepository rentalRepository, CloudinaryService cloudinaryService,
-            AuthService authService, AuthenticatedUserMapper authenticatedUserMapper,
+    public RentalService(RentalRepository rentalRepository, ICloudinaryService cloudinaryService,
+            IAuthService authService, AuthenticatedUserMapper authenticatedUserMapper,
             CreateRentalMapper createRentalMapper) {
         this.rentalRepository = rentalRepository;
         this.cloudinaryService = cloudinaryService;
@@ -93,6 +96,7 @@ public class RentalService implements IRentalService {
         }
 
         User authenticatedUser = authenticatedUserMapper.toUser(authService.getAuthenticatedUser());
+
         Rental rental = createRentalMapper.toRental(createRentalDTO);
         rental.setPicture(imageUrl.get());
         rental.setUser(authenticatedUser);
