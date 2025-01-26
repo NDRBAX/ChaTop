@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chatop.rental_portal_backend.dto.AuthenticatedUserDTO;
-import com.chatop.rental_portal_backend.services.impl.IUserService;
+import com.chatop.rental_portal_backend.services.IUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,32 +32,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(
-        summary = "Get User by ID",
-        description = "Fetches user details for a given user ID.", responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "User details retrieved successfully",
-                content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = AuthenticatedUserDTO.class))
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = Void.class),
-                examples = @ExampleObject(value = "",
-                summary = "Unauthorized"))
-            )
-        }
-    )
-    @Parameter(
-        name = "id",
-        description = "The ID of the user to fetch",
-        required = true,
-        example = "1",
-        schema = @Schema(implementation = int.class)
-    )
+    @Operation(summary = "Get User by ID", description = "Fetches user details for a given user ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticatedUserDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class), examples = @ExampleObject(value = "", summary = "Unauthorized")))
+    })
+    @Parameter(name = "id", description = "The ID of the user to fetch", required = true, example = "1", schema = @Schema(implementation = int.class))
     @SecurityRequirement(name = "bearer-key")
     @GetMapping("/{id}")
     public ResponseEntity<AuthenticatedUserDTO> getUserById(@Valid @PathVariable int id) {

@@ -1,4 +1,4 @@
-package com.chatop.rental_portal_backend.services.impl;
+package com.chatop.rental_portal_backend.services;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;

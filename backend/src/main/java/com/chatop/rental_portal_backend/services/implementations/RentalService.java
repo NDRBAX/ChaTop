@@ -1,4 +1,4 @@
-package com.chatop.rental_portal_backend.services;
+package com.chatop.rental_portal_backend.services.implementations;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -15,9 +15,9 @@ import com.chatop.rental_portal_backend.mappers.CreateRentalMapper;
 import com.chatop.rental_portal_backend.models.Rental;
 import com.chatop.rental_portal_backend.models.User;
 import com.chatop.rental_portal_backend.repositories.RentalRepository;
-import com.chatop.rental_portal_backend.services.impl.IAuthService;
-import com.chatop.rental_portal_backend.services.impl.ICloudinaryService;
-import com.chatop.rental_portal_backend.services.impl.IRentalService;
+import com.chatop.rental_portal_backend.services.IAuthService;
+import com.chatop.rental_portal_backend.services.ICloudinaryService;
+import com.chatop.rental_portal_backend.services.IRentalService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,13 +44,20 @@ public class RentalService implements IRentalService {
 
     }
 
-    // Get all rentals
+    /**
+     * Retrieves a list of all rentals.
+     *
+     * This method fetches all rental entities from the repository, maps them to
+     * RentalResponseDTO objects, and returns the list of these DTOs. Each DTO
+     * contains the rental's id, name, surface, price, picture, description, user id,
+     * creation date, and last updated date.
+     *
+     * @return a list of RentalResponseDTO objects representing all rentals.
+     */
     @Override
     public List<RentalResponseDTO> getRentals() {
         log.info(">>> GETTING ALL RENTALS");
-        List<Rental> rentalsFromDb = rentalRepository.findAll();
-
-        List<RentalResponseDTO> rentals = rentalsFromDb.stream()
+        return rentalRepository.findAll().stream()
                 .map(rental -> new RentalResponseDTO(
                         rental.getId(),
                         rental.getName(),
@@ -62,11 +69,15 @@ public class RentalService implements IRentalService {
                         dateFormat.format(rental.getCreated_at()),
                         dateFormat.format(rental.getUpdated_at())))
                 .collect(Collectors.toList());
-
-        return rentals;
     }
 
-    // Get a rental by id
+    
+    /**
+     * Retrieves a rental by its ID.
+     *
+     * @param id the ID of the rental to retrieve
+     * @return a RentalResponseDTO containing the rental details
+     */
     @Override
     public RentalResponseDTO getRentalById(int id) {
         log.info(">>> GETTING RENTAL BY ID");
@@ -85,7 +96,15 @@ public class RentalService implements IRentalService {
                 dateFormat.format(rental.getUpdated_at()));
     }
 
-    // Create a rental
+    /**
+     * Creates a new rental entry.
+     *
+     * This method uploads the rental picture to the cloud storage, maps the authenticated user
+     * and rental data transfer object (DTO) to their respective entities, and saves the rental
+     * information to the repository.
+     *
+     * @param createRentalDTO the data transfer object containing rental information
+     */
     @Override
     public void createRental(CreateRentalDTO createRentalDTO) {
         Optional<String> imageUrl = cloudinaryService.uploadImage(createRentalDTO.getPicture());
@@ -103,7 +122,15 @@ public class RentalService implements IRentalService {
         rentalRepository.save(rental);
     }
 
-    // Update a rental by id
+    /**
+     * Updates a rental entry in the system.
+     *
+     * This method updates the rental information with the
+     * data from the updateRentalDTO object, and then saves the updated rental information to the repository.
+     *
+     * @param id the ID of the rental to update
+     * @param updateRentalDTO the data transfer object containing the updated rental information
+     */
     @Override
     public void updateRental(int id, UpdateRentalDTO updateRentalDTO) {
         Rental rental = rentalRepository.findById(id)

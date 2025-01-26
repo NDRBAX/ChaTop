@@ -17,6 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class ChatopAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    /**
+     * This method is called whenever an unauthenticated user tries to access a
+     * protected resource.
+     *
+     * This method sends an HTTP response with the appropriate status code and
+     * message based on the request URI.
+     *
+     * @param request       the HTTP request.
+     * @param response      the HTTP response.
+     * @param authException the exception that caused the authentication failure.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException {
@@ -44,7 +56,6 @@ public class ChatopAuthenticationEntryPoint implements AuthenticationEntryPoint 
             response.getWriter().write("");
             log.error(authException.getMessage());
         }
-
     }
 
 }

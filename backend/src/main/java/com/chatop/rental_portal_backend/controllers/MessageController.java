@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chatop.rental_portal_backend.dto.MessageRequestDTO;
 import com.chatop.rental_portal_backend.dto.ResponseMessageDTO;
-import com.chatop.rental_portal_backend.services.impl.IMessageService;
+import com.chatop.rental_portal_backend.services.IMessageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,41 +33,15 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    @Operation(
-        summary = "Send a message",
-        description = "Sends a message to a user.",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Message sent successfully", 
-                content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ResponseMessageDTO.class),
-                  examples = @ExampleObject(
-                    value = """
+    @Operation(summary = "Send a message", description = "Sends a message to a user.", responses = {
+            @ApiResponse(responseCode = "200", description = "Message sent successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseMessageDTO.class), examples = @ExampleObject(value = """
                     {
                         "message": "Message sent with success"
                     }
-                    """,
-                    summary = "Message sent successfully")
-                )
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = Void.class),
-                examples = @ExampleObject(value = "",
-                summary = "Unauthorized"))
-            )
-        }
-    )
-    @Parameter(
-        name = "messageRequest",
-        description = "The message to be sent",
-        required = true,
-        content = @Content(mediaType = "application/json",
-        schema = @Schema(implementation = MessageRequestDTO.class)
-    ))
+                    """, summary = "Message sent successfully"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class), examples = @ExampleObject(value = "", summary = "Unauthorized")))
+    })
+    @Parameter(name = "messageRequest", description = "The message to be sent", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageRequestDTO.class)))
     @SecurityRequirement(name = "bearer-key")
     @PostMapping
     public ResponseEntity<ResponseMessageDTO> sendMessage(@Valid @RequestBody MessageRequestDTO messageRequest) {
