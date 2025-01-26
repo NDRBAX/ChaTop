@@ -1,10 +1,13 @@
 package com.chatop.rental_portal_backend.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.chatop.rental_portal_backend.models.User;
-
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.chatop.rental_portal_backend.models.User;
+
+@Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 }
