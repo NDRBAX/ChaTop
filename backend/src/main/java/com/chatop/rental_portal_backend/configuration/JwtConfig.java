@@ -22,6 +22,14 @@ public class JwtConfig {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    /**
+     * Configures the JWT decoder.
+     * 
+     * This method configures the JWT decoder to use the provided secret key and
+     * algorithm to decode tokens.
+     * 
+     * @return the configured JWT decoder.
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(this.jwtSecret.getBytes(), "HmacSHA256");
@@ -29,6 +37,14 @@ public class JwtConfig {
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS256).build();
     }
 
+    /**
+     * Configures the JWT encoder.
+     * 
+     * This method configures the JWT encoder to use the provided secret key to
+     * encode tokens.
+     * 
+     * @return the configured JWT encoder.
+     */
     @Bean
     public JwtEncoder jwtEncoder() {
         log.info("### JWT ENCODER CONFIGURATION ###");
