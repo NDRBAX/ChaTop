@@ -1,4 +1,4 @@
-package com.chatop.rental_portal_backend.services;
+package com.chatop.rental_portal_backend.services.implementations;
 
 import java.util.ArrayList;
 
@@ -22,6 +22,16 @@ public class UserDetailsLoaderService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Loads a user by their email.
+     *
+     * This method loads a user from the repository by their email and returns a
+     * UserDetails object representing the user.
+     *
+     * @param email the email of the user to load.
+     * @return a UserDetails object representing the user.
+     * @throws UsernameNotFoundException if the user is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("### Attempting to load user by email {} ###", email);
