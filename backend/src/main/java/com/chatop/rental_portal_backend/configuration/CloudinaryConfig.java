@@ -22,6 +22,14 @@ public class CloudinaryConfig {
     @Value("${cloud.api_key}")
     private String API_KEY;
 
+    /**
+     * Configures the Cloudinary client.
+     * 
+     * This method configures the Cloudinary client to use the provided cloud name,
+     * API key, and API secret.
+     * 
+     * @return the configured Cloudinary client.
+     */
     @Bean
     public Cloudinary cloudinary() {
         log.info("### CLOUDINARY CONFIGURATION ###");
